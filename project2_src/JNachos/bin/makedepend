@@ -1,0 +1,60 @@
+#!/usr/bin/perl -w
+
+$pathSeparator="/";
+
+## build the list of all java files in the directory
+use File::Find;
+
+@javalist = ();
+find(\&wanted, '.');
+
+sub wanted { 
+    push @javalist, $File::Find::name 
+        if $File::Find::name =~ /\.java$/
+		 && $File::Find::dir !~ /log/
+		#	&& $File::Find::dir !~ /kern/
+		#	    && $File::Find::dir !~ /filesystem/ 
+		#		&& $File::Find::dir !~ /machine/;
+
+}
+
+## Keys will list directories to create. Hash is used to remove duplicates.
+%packagePaths = ();
+
+use File::Basename;
+
+## extract packages
+@classlist=();
+
+foreach $file (@javalist)
+{
+    $packagePath="";
+    open FILE, $file or die "Could not open $file, error code: $!\n";
+    while(<FILE>)
+    {
+        if(/package\s+(.*);/)
+        {
+            $packagePath = $1;
+            ## change all dots to slashes
+            $packagePath =~ s|\.|$pathSeparator|g;
+            $packagePaths{$packagePath}=1;
+            ## prepend $(DEST_DIR) and change suffix to .class
+            push @classlist
+                , "\$(DEST_DIR)$pathSeparator" . $packagePath 
+                    . "$pathSeparator" . basename($file,".java") . ".class";
+            last;
+        }
+    }
+    close FILE;
+}
+
+print "SOURCES=", join(" \\\n", @javalist), "\n";
+print "DOCSOURCES=", join(" \\\n", @javalist), "\n";
+print "CLASSES=", join(" \\\n", @classlist), "\n";
+
+
+use File::Path;
+
+## making dirs
+#@classdirs = keys %packagePaths;
+#mkpath("build/classes/"\@classdirs,0,0777);
