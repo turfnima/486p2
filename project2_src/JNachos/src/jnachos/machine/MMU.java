@@ -8,6 +8,7 @@
 package jnachos.machine;
 
 import jnachos.kern.*;
+import jnachos.kern.mem.NFU;
 
 /**
  * NOTE: the hardware translation of virtual addresses in the user program to
@@ -137,7 +138,7 @@ public class MMU {
 		}
 
 		entry.use = true; // set the use, dirty bits
-
+		NFU.counter[entry.physicalPage]++; //for NFU
 		if (writing) {
 			entry.dirty = true;
 		}
@@ -152,7 +153,8 @@ public class MMU {
 
 	//for project 02
 	//cis 486
-	public static TranslationEntry translationEntryForPhysicalPage(int physicalPage) {
+	public static TranslationEntry translationEntryForPhysicalPage(int physicalPage)
+	{
     int victimPid = JNachos.getPageFrameMap()[physicalPage];
     if (victimPid < 0) {
 	return null;

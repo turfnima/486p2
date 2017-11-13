@@ -13,9 +13,7 @@ import java.util.Map;
 
 import jnachos.machine.*;
 import jnachos.filesystem.*;
-import jnachos.kern.mem.PageReplacementAlgorithm;
-import jnachos.kern.mem.ZeroPageFrame;
-
+import jnachos.kern.mem.*;
 /**
  * Interrupt handler for the timer device. The timer device is set up to
  * interrupt the CPU periodically (once every TimerTicks). This routine is
@@ -43,6 +41,12 @@ class TimerInterruptHandler implements VoidFunctionPtr {
 	public void call(Object pDummy) {
 		// If we are not in idle mode
 		if (Interrupt.getStatus() != Interrupt.IdleMode) {
+
+			//translate the entry for physical page, literally.
+			for (int i=0; i< Machine.NumPhysPages; i++){
+				TranslationEntry entry=MMU.translationEntryForPhysicalPage(i);
+				if(entry !=null) entry.use=false; //if the entry is not null, there is data in it.
+			}
 			// Yield on return
 			Interrupt.yieldOnReturn();
 		}
@@ -234,9 +238,9 @@ public abstract class JNachos {
 
     //this should be changed for project 2
 		//mPageReplacementAlgorithm = new ZeroPageFrame();
-		mPageReplacementAlgorithm = new FIFO();
-//		mPageReplacementAlgorithm = new Random();
-//		mPageReplacementAlgorithm = new ZeroPageFrame();
+		//mPageReplacementAlgorithm = new FIFO();
+mPageReplacementAlgorithm = new NFU();
+//	mPageReplacementAlgorithm = new ZeroPageFrame();
 
 		mPageFrameToPid = new int[Machine.NumPhysPages];
 		for (int i = 0; i < Machine.NumPhysPages; i++) {

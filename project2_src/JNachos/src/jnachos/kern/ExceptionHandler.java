@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 1992-1993 The Regents of the University of California.
- * All rights reserved.  See copyright.h for copyright notice and limitation 
+ * All rights reserved.  See copyright.h for copyright notice and limitation
  * of liability and disclaimer of warranty provisions.
  *
  *  Created by Patrick McSweeney on 12/13/08.
@@ -9,7 +9,7 @@
 package jnachos.kern;
 
 import jnachos.machine.*;
-
+import jnachos.kern.mem.FIFO;
 /**
  * The ExceptionHanlder class handles all exceptions raised by the simulated
  * machine. This class is abstract and should not be instantiated.
@@ -106,6 +106,9 @@ public abstract class ExceptionHandler {
 			JNachos.mSwapSpace.readAt(bytes, Machine.PageSize,
 					JNachos.getCurrentProcess().getSpace().diskmap[faultVPN] * Machine.PageSize);
 			System.arraycopy(bytes, 0, Machine.mMainMemory, ppn * Machine.PageSize, Machine.PageSize);
+
+			//implementation of FIFO for project 2 cis 486
+			//FIFO.list.add(ppn);
 
 			// Update current process's page table
 			JNachos.getCurrentProcess().getSpace().mPageTable[faultVPN].physicalPage = ppn;
